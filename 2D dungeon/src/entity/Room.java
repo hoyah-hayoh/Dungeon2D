@@ -7,29 +7,31 @@ import java.util.ArrayList;
 import main.Main;
 
 public class Room {
+	
 	public int size_y;
 	public int size_x;
 	public int y;
 	public int x;
-	private Main m;
+	private Level l;
 	public boolean[] xy = new boolean[4];
 	public ArrayList<Room> linked = new ArrayList<Room>();
 	public int id = -1;
 	public Color colour;
-	public Room(int x, int y, int size_x, int size_y, Main m, int id) {
+	
+	public Room(int x, int y, int size_x, int size_y, Level l, int id) {
 		this.x = x;
 		this.y = y;
 		this.size_x = size_x;
 		this.size_y = size_y;
-		this.m = m;
-		this.colour = m.randomColor();
+		this.l = l;
+		this.colour = l.m.randomColor();
 		this.id = id;
 	}
 	public void addTiles(){
 		for(int xx = x; xx < x+size_x; xx+=Tile.size){
 			for(int yy = y; yy < y+size_y; yy+=Tile.size){
 				Tile t = new Tile(xx, yy, "Floor", this);
-				m.grid.add(t);
+				l.grid.add(t);
 			}
 		}
 	}
@@ -40,15 +42,15 @@ public class Room {
 		xy[3] = false;//top
 		if(x+xmove <= 0){
 			xy[1] = true;
-		}else if(x+xmove+size_x >= m.grid_x){
+		}else if(x+xmove+size_x >= l.grid_x){
 			xy[0] = true;
 		}else if(y+ymove <= 0){
 			xy[3] = true;
 		}
-		else if(y+ymove+size_y >= m.grid_y){
+		else if(y+ymove+size_y >= l.grid_y){
 			xy[2] = true;
 		}
-		for(Room e : new ArrayList<Room>(m.rooms)){
+		for(Room e : new ArrayList<Room>(l.rooms)){
 			if(e != this){
 				Rectangle object = new Rectangle((int)e.x, (int)e.y, e.size_x, e.size_y);
 				Rectangle aftermove = new Rectangle((int)(x+xmove), (int)(y), size_x, size_y);
