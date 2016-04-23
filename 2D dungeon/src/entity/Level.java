@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import main.Main;
 
@@ -18,22 +19,29 @@ public class Level {
 	int room_min_size = 3;
 	public Main m;
 	public BufferedImage minimap;
+	public ArrayList<Room> stairs = new ArrayList<Room>();
 	
-	public Level(Main m) {
+	
+	public Level(Main m, int xsize, int ysize, int roomcount, int rmax, int rmin) {
 		this.m = m;
+		grid_x = xsize;
+		grid_y = ysize;
+		number_rooms = roomcount;
+		room_max_size = rmax;
+		room_min_size = rmin;
 		createGrid();
 	}
-	private void GetMinimap(Level l) {
-		BufferedImage mini = new BufferedImage(l.grid_x, l.grid_y, BufferedImage.TYPE_INT_ARGB);
+	private void SetMinimap() {
+		BufferedImage mini = new BufferedImage(grid_x, grid_y, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = mini.createGraphics();
-		
-		for(Tile e : new ArrayList<Tile>(l.grid)){
+		g.scale(200.0/(double)grid_x, 200.0/(double)grid_y);
+		for(Tile e : new ArrayList<Tile>(grid)){
 			g.setColor(e.getColor());
 			g.fillRect(e.x, e.y, Tile.size-1, Tile.size-1);
 		}
-		
 		g.dispose();
-		//scale it etc
+
+		minimap = mini;
 	}
 	private void createGrid() {
 		grid = new ArrayList<Tile>();
@@ -42,6 +50,12 @@ public class Level {
 		shufflerooms();
 		addTiles();
 		LinkRooms();
+		LinkFloors();
+		SetMinimap();
+		Collections.reverse(grid);
+	}
+	private void LinkFloors() {
+		
 	}
 	private void LinkRooms() {
 		for(Room r : new ArrayList<Room>(rooms)){
@@ -52,6 +66,15 @@ public class Level {
 				}
 			}
 		}
+		for(Room r : new ArrayList<Room>(rooms)){
+			if(r != null){
+				Room r2 = getNearestNeighbour(r);
+				if(r2 != null){
+					createPassage(r, r2);
+				}
+			}
+		}
+		m.floorscreated++;
 	}
 	private Room getNearestNeighbour(Room r) {
 		double dist = 10000000;
@@ -79,15 +102,8 @@ public class Level {
 		
 		r.linked.add(r2);
 		r2.linked.add(r);
-		
-		if(r.id < r2.id){
-			r2.id = r.id;
-			r2.colour = r.colour;
-		}else{
-			r.id = r2.id;
-			r.colour = r2.colour;
-		}
-		for(int xtile = 0; xtile < Math.abs(centrex2-centrex)+Tile.size; xtile+=Tile.size){
+
+		for(int xtile = 0; xtile < Math.abs(centrex2-centrex)+Tile.size*2; xtile+=Tile.size){
 			if(centrex < centrex2){
 				Tile tile = new Tile(centrex+xtile, centrey, "", r);
 				grid.add(tile);
@@ -161,6 +177,9 @@ public class Level {
 					}
 				}
 			}
+			if(intersections < number_rooms/10){
+				break;
+			}
 		}while(intersection);
 	}
 	private void createRooms(int i) {
@@ -171,8 +190,8 @@ public class Level {
 			radius = grid_x/2;	
 		}
 		for(int r = 0; r < i; r++){
-			int xsize = roundm((int)(m.randomBiased(0.8)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
-			int ysize = roundm((int)(m.randomBiased(0.8)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
+			int xsize = roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
+			int ysize = roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
 			
 			int[] pt = getRandomPointInCircle(radius, xsize, ysize);
 			if(pt[0]-xsize/2 < 0) pt[0] = roundm(xsize/2)+Tile.size;

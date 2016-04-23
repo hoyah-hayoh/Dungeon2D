@@ -17,6 +17,8 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 		if(key == KeyEvent.VK_F1){
+			System.out.println("Floors: "+m.floorscreated+" Time: "+((System.currentTimeMillis()-m.starttime)/1000.0));
+			System.out.println("Rate: "+(m.floorscreated/((System.currentTimeMillis()-m.starttime)/1000.0)));
 			System.exit(0);
 		}
 		if(key == KeyEvent.VK_UP){
