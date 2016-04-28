@@ -2,10 +2,11 @@ package entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import main.Main;
 
 public class Level {
@@ -43,6 +44,11 @@ public class Level {
 
 		minimap = mini;
 	}
+	public void newTile(int x, int y, String type, Room r){
+		grid.remove(getTileAtPoint(x, y));
+		Tile tile = new Tile(x, y, "Floor", r);
+		grid.add(tile);
+	}
 	private void createGrid() {
 		grid = new ArrayList<Tile>();
 		rooms = new ArrayList<Room>();
@@ -50,9 +56,31 @@ public class Level {
 		shufflerooms();
 		addTiles();
 		LinkRooms();
-		LinkFloors();
-		SetMinimap();
+		fillLevel();
 		Collections.reverse(grid);
+		LinkFloors();
+		//SetMinimap();
+	}
+	private void fillLevel() {
+		for(int x = 0; x < grid_x; x+=Tile.size){
+			for(int y = 0; y < grid_y; y+=Tile.size){
+				newTile(x, y, "Wall", rooms.get(0));
+			}
+		}
+	}
+	public Tile getTileAtPoint(int x, int y) {	
+	    for (Tile o : grid) {
+	    	double cx = o.x;
+	    	double cy = o.y;
+	        if(isPointInSquare(cx, cy, Tile.size, x, y)){
+	            return o;
+	        }
+	    }   
+	    return null;
+	}
+	private boolean isPointInSquare(double cx, double cy, int size, int x, int y) {
+		Rectangle rect = new Rectangle((int)cx, (int)cy, size, size);
+	    return rect.contains(new Point(x,y));
 	}
 	private void LinkFloors() {
 		
@@ -95,38 +123,30 @@ public class Level {
 		return room;
 	}
 	private void createPassage(Room r, Room r2) {
-		int centrex = roundm(r.x + r.size_x/2 - Tile.size/2);
-		int centrey = roundm(r.y + r.size_y/2 - Tile.size/2);
-		int centrex2 = roundm(r2.x + r2.size_x/2 - Tile.size/2);
-		int centrey2 = roundm(r2.y + r2.size_y/2 - Tile.size/2);
+		int centrex = m.roundm(r.x + r.size_x/2 - Tile.size/2);
+		int centrey = m.roundm(r.y + r.size_y/2 - Tile.size/2);
+		int centrex2 = m.roundm(r2.x + r2.size_x/2 - Tile.size/2);
+		int centrey2 = m.roundm(r2.y + r2.size_y/2 - Tile.size/2);
 		
 		r.linked.add(r2);
 		r2.linked.add(r);
 
 		for(int xtile = 0; xtile < Math.abs(centrex2-centrex)+Tile.size*2; xtile+=Tile.size){
 			if(centrex < centrex2){
-				Tile tile = new Tile(centrex+xtile, centrey, "", r);
-				grid.add(tile);
-				Tile tile2 = new Tile(centrex+xtile, centrey+Tile.size, "", r);
-				grid.add(tile2);
+				newTile(centrex+xtile, centrey, "Floor", r);
+				newTile(centrex+xtile, centrey+Tile.size, "Floor", r);
 			}else{
-				Tile tile = new Tile(centrex-xtile, centrey, "", r);
-				grid.add(tile);
-				Tile tile2 = new Tile(centrex-xtile, centrey+Tile.size, "", r);
-				grid.add(tile2);
+				newTile(centrex-xtile, centrey, "Floor", r);
+				newTile(centrex-xtile, centrey+Tile.size, "Floor", r);
 			}
 		}
 		for(int ytile = 0; ytile < Math.abs(centrey2-centrey)+Tile.size*2; ytile+=Tile.size){
 			if(centrey < centrey2){
-				Tile tile = new Tile(centrex2, centrey+ytile, "", r2);
-				grid.add(tile);
-				Tile tile2 = new Tile(centrex2+Tile.size, centrey+ytile, "", r2);
-				grid.add(tile2);
+				newTile(centrex2, centrey+ytile, "Floor", r2);
+				newTile(centrex2+Tile.size, centrey+ytile, "Floor", r2);
 			}else{
-				Tile tile = new Tile(centrex2, centrey-ytile, "", r2);
-				grid.add(tile);
-				Tile tile2 = new Tile(centrex2+Tile.size, centrey-ytile, "", r2);
-				grid.add(tile2);
+				newTile(centrex2, centrey-ytile, "Floor", r2);
+				newTile(centrex2+Tile.size, centrey-ytile, "Floor", r2);
 			}
 		}
 	}
@@ -170,7 +190,7 @@ public class Level {
 				}else{
 					ymove = ((10/r.size_y)+Tile.size);
 				}
-				boolean[] xy = r.move(roundm(xmove), roundm(ymove));
+				boolean[] xy = r.move(m.roundm(xmove), m.roundm(ymove));
 				for(int c = 0; c < xy.length; c++){
 					if(xy[c]){ intersection = true;
 						intersections++;
@@ -190,21 +210,17 @@ public class Level {
 			radius = grid_x/2;	
 		}
 		for(int r = 0; r < i; r++){
-			int xsize = roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
-			int ysize = roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
+			int xsize = m.roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
+			int ysize = m.roundm((int)(m.randomBiased(0.9)*((room_max_size-room_min_size)*Tile.size))+(room_min_size*Tile.size));
 			
 			int[] pt = getRandomPointInCircle(radius, xsize, ysize);
-			if(pt[0]-xsize/2 < 0) pt[0] = roundm(xsize/2)+Tile.size;
-			if(pt[1]-ysize/2 < 0) pt[1] = roundm(ysize/2)+Tile.size;
-			if(pt[0]+xsize/2 > grid_x) pt[0] = roundm(grid_x-xsize/2)-Tile.size;
-			if(pt[1]+ysize/2 > grid_y) pt[1] = roundm(grid_y-ysize/2)-Tile.size;
+			if(pt[0]-xsize/2 < 0) pt[0] = m.roundm(xsize/2)+Tile.size;
+			if(pt[1]-ysize/2 < 0) pt[1] = m.roundm(ysize/2)+Tile.size;
+			if(pt[0]+xsize/2 > grid_x) pt[0] = m.roundm(grid_x-xsize/2)-Tile.size;
+			if(pt[1]+ysize/2 > grid_y) pt[1] = m.roundm(grid_y-ysize/2)-Tile.size;
 			
 			rooms.add(new Room(pt[0], pt[1], xsize, ysize, this, rooms.size()));
 		}
-	}
-	public int roundm(double n) {
-		int m = Tile.size;
-		return (int) (Math.floor(((n + m - 1)/m))*m);
 	}
 	public int[] getRandomPointInCircle(int radius, int xsize, int ysize){
 		  double t = 2*Math.PI*Math.random();
@@ -214,8 +230,8 @@ public class Level {
 		  else r = u;
 		  
 		  int[] var = new int[2];
-		  var[0] = (int) roundm(radius*r*Math.cos(t)+grid_x/2-xsize/2);
-		  var[1] = (int) roundm(radius*r*Math.sin(t)+grid_y/2-ysize/2);
+		  var[0] = (int) m.roundm(radius*r*Math.cos(t)+grid_x/2-xsize/2);
+		  var[1] = (int) m.roundm(radius*r*Math.sin(t)+grid_y/2-ysize/2);
 		  return var;
 	}
 }

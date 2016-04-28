@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import entity.Level;
+import entity.Player;
 import entity.Room;
 import entity.Tile;
 
@@ -16,7 +17,7 @@ public class Main {
 	
 	ArrayList<Level> floors = new ArrayList<Level>();
 	BufferStrategy bs;
-	JFrame f;
+	public JFrame f;
 	Key key;
 	public int mousex;
 	public int mousey;
@@ -26,6 +27,8 @@ public class Main {
 	int currentfloor = 0;
 	public int floorscreated = 0;
 	long starttime = 0;
+	Player player;
+	
 	public Main() {
 		f = new JFrame();
 		f.setSize(800, 600);
@@ -44,7 +47,11 @@ public class Main {
 		new TimeHandler(this, 64).start();
 		new Graphics(this).start();
 		
-		createMap(200, 1000, 1000, 30, 20, 3);
+		createMap(10, 4000, 4000, 100, 40, 3);
+		StartGame();
+	}
+	private void StartGame() {
+		player = new Player(this, getCurrentLevel().rooms.get(0).x, getCurrentLevel().rooms.get(0).y);
 	}
 	private void createMap(int numberfloors, int width, int height, int roomcount, int rmax, int rmin) {
 		starttime = System.currentTimeMillis();
@@ -59,30 +66,19 @@ public class Main {
 		return l.minimap;
 	}
 	public void render(Graphics2D g) {
-		Level l = floors.get(currentfloor);
+		Level l = getCurrentLevel();
 		if(l.grid != null){
-			for(Room e : new ArrayList<Room>(l.rooms)){
-				g.setColor(Color.CYAN);
-				g.fillRect(e.x+xsc, e.y+ysc, e.size_x, e.size_y);
-			}
 			for(Tile e : new ArrayList<Tile>(l.grid)){
 				g.setColor(e.getColor());
 				g.fillRect(e.x+xsc, e.y+ysc, Tile.size-1, Tile.size-1);
 			}
 		}
+		player.render(g);
 		g.setColor(Color.RED);
 		g.drawRect(xsc, ysc, l.grid_x, l.grid_y);
-		g.drawImage(l.minimap, f.getWidth()-202, 2, null);
 		g.drawRect(f.getWidth()-202, 2, 200, 200);
-		g.setColor(Color.YELLOW);
-		g.fillOval(f.getWidth()/2 - 10, f.getHeight()/2 - 10, 20, 20);
-		double x = -xsc*(200.0/(double)l.grid_x)+f.getWidth()-127;
-		double y = -ysc*(200.0/(double)l.grid_y)+57;
-		if(x+10 > f.getWidth()-202 && x < f.getWidth()-2 && y+10 > 2 && y < 202){
-			g.fillOval((int)x, (int)y, 10, 10);
-		}
 		g.setColor(Color.GREEN);
-		g.drawString("Zoom: "+zoomlevel, 50, 80);
+		g.drawString("Floor: "+currentfloor, 50, 80);
 	}
 	public Color randomColor() {
 		return new Color((float)randomBiased(0.6), (float)randomBiased(0.6), (float)randomBiased(0.6));
@@ -91,10 +87,17 @@ public class Main {
 	     double v = Math.pow(Math.random(), bias); 
 	     return v;
 	}
-	public void tick() {	
-		key.tick();
+	public int roundm(double n) {
+		int m = Tile.size;
+		return (int) (Math.floor(((n + m - 1)/m))*m);
+	}
+	public void tick(int tickcount) {	
+		key.tick(tickcount);
 	}
 	public static void main(String[] args) {
 		new Main();
+	}
+	public Level getCurrentLevel() {
+		return floors.get(currentfloor);
 	}
 }

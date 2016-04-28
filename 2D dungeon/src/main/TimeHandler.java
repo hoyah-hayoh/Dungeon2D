@@ -25,7 +25,7 @@ public class TimeHandler extends Thread{
 			previousTime = currentTime;
 			unprocessedSeconds += passedTime / 1000000000.0;
 			while (unprocessedSeconds > secondsPerTick) {
-				m.tick();
+				m.tick(tickcount);
 				tickcount++;
 				unprocessedSeconds -= secondsPerTick;
 				if (tickcount % tickrate == 0) {	
