@@ -7,12 +7,14 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import main.Main;
 
 public class Level {
 	
 	public ArrayList<Tile> grid;
 	public ArrayList<Room> rooms;
+	public ArrayList<Tile> lighting;
 	public int grid_x = 3200;
 	public int grid_y = 2400;
 	int number_rooms = 80;
@@ -33,57 +35,62 @@ public class Level {
 		createGrid();
 	}
 	private void SetMinimap() {
-		BufferedImage mini = new BufferedImage(grid_x, grid_y, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage mini = new BufferedImage((int)(grid_x/Tile.size), (int)(grid_y/Tile.size), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = mini.createGraphics();
-		g.scale(200.0/(double)grid_x, 200.0/(double)grid_y);
 		for(Tile e : new ArrayList<Tile>(grid)){
 			g.setColor(e.getColor());
-			g.fillRect(e.x, e.y, Tile.size-1, Tile.size-1);
+			g.fillRect(e.x/Tile.size, e.y/Tile.size, 1, 1);
 		}
 		g.dispose();
 
 		minimap = mini;
 	}
-	public void newTile(int x, int y, String type, Room r){
-		grid.remove(getTileAtPoint(x, y));
+	public void newWall(int x, int y, Room r){
+		for(Tile t : getTilesAtPoint(x, y)){
+			if(t.type == "Floor"){
+				return;
+			}
+		}
+		Tile t = new Tile(x, y, "Wall", r);
+		grid.add(t);
+	}
+	public void newFloor(int x, int y, Room r){
+		grid.removeAll(getTilesAtPoint(x, y));
 		Tile tile = new Tile(x, y, "Floor", r);
 		grid.add(tile);
 	}
 	private void createGrid() {
 		grid = new ArrayList<Tile>();
 		rooms = new ArrayList<Room>();
+		lighting = new ArrayList<Tile>();
 		createRooms(number_rooms);
 		shufflerooms();
-		addTiles();
 		LinkRooms();
-		fillLevel();
-		Collections.reverse(grid);
-		LinkFloors();
+		addWalls();
+		addFloor();
+		//fillLevel();
+		//Collections.reverse(grid);
+		//LinkFloors();
 		//SetMinimap();
 	}
-	private void fillLevel() {
-		for(int x = 0; x < grid_x; x+=Tile.size){
-			for(int y = 0; y < grid_y; y+=Tile.size){
-				newTile(x, y, "Wall", rooms.get(0));
-			}
-		}
+	public void addWall(int xx, int yy, Room r){
+		
 	}
-	public Tile getTileAtPoint(int x, int y) {	
+	public ArrayList<Tile> getTilesAtPoint(int x, int y) {
+		ArrayList<Tile> tiles = new ArrayList<Tile>();
 	    for (Tile o : grid) {
+	    	
 	    	double cx = o.x;
 	    	double cy = o.y;
 	        if(isPointInSquare(cx, cy, Tile.size, x, y)){
-	            return o;
+	            tiles.add(o);
 	        }
 	    }   
-	    return null;
+	    return tiles;
 	}
 	private boolean isPointInSquare(double cx, double cy, int size, int x, int y) {
 		Rectangle rect = new Rectangle((int)cx, (int)cy, size, size);
 	    return rect.contains(new Point(x,y));
-	}
-	private void LinkFloors() {
-		
 	}
 	private void LinkRooms() {
 		for(Room r : new ArrayList<Room>(rooms)){
@@ -133,26 +140,39 @@ public class Level {
 
 		for(int xtile = 0; xtile < Math.abs(centrex2-centrex)+Tile.size*2; xtile+=Tile.size){
 			if(centrex < centrex2){
-				newTile(centrex+xtile, centrey, "Floor", r);
-				newTile(centrex+xtile, centrey+Tile.size, "Floor", r);
+				newWall(centrex+xtile, centrey-Tile.size, r);
+				newWall(centrex+xtile, centrey+Tile.size+Tile.size, r);
+				newFloor(centrex+xtile, centrey, r);
+				newFloor(centrex+xtile, centrey+Tile.size, r);
 			}else{
-				newTile(centrex-xtile, centrey, "Floor", r);
-				newTile(centrex-xtile, centrey+Tile.size, "Floor", r);
+				newWall(centrex-xtile, centrey-Tile.size, r);
+				newWall(centrex-xtile, centrey+Tile.size+Tile.size, r);
+				newFloor(centrex-xtile, centrey, r);
+				newFloor(centrex-xtile, centrey+Tile.size, r);
 			}
 		}
 		for(int ytile = 0; ytile < Math.abs(centrey2-centrey)+Tile.size*2; ytile+=Tile.size){
 			if(centrey < centrey2){
-				newTile(centrex2, centrey+ytile, "Floor", r2);
-				newTile(centrex2+Tile.size, centrey+ytile, "Floor", r2);
+				newWall(centrex2-Tile.size, centrey+ytile, r2);
+				newWall(centrex2+Tile.size+Tile.size, centrey+ytile, r2);
+				newFloor(centrex2, centrey+ytile, r2);
+				newFloor(centrex2+Tile.size, centrey+ytile, r2);
 			}else{
-				newTile(centrex2, centrey-ytile, "Floor", r2);
-				newTile(centrex2+Tile.size, centrey-ytile, "Floor", r2);
+				newWall(centrex2-Tile.size, centrey-ytile, r2);
+				newWall(centrex2+Tile.size+Tile.size, centrey-ytile, r2);
+				newFloor(centrex2, centrey-ytile, r2);
+				newFloor(centrex2+Tile.size, centrey-ytile, r2);
 			}
 		}
 	}
-	private void addTiles() {
+	private void addWalls() {
 		for(Room r : new ArrayList<Room>(rooms)){
-			r.addTiles();
+			r.addWalls();
+		}
+	}
+	private void addFloor() {
+		for(Room r : new ArrayList<Room>(rooms)){
+			r.addFloor();
 		}
 	}
 	private void shufflerooms(){

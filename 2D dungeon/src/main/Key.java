@@ -58,33 +58,55 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 	}
 	
 	public void tick(int tickcount){
-		if(tickcount % 5 == 0){
-			if(key[KeyEvent.VK_W]){
-				m.player.move(0, -Tile.size);
-			}
-			if(key[KeyEvent.VK_S]){
-				m.player.move(0, Tile.size);
-			}
-			if(key[KeyEvent.VK_A]){
-				m.player.move(-Tile.size, 0);
-			}
-			if(key[KeyEvent.VK_D]){
-				m.player.move(Tile.size, 0);
-			}
+		if(key[KeyEvent.VK_W]){
+				m.player.move(0, -2);
 		}
-		if(key[KeyEvent.VK_F1]){
-			System.out.println("Floors: "+m.floorscreated+" Time: "+((System.currentTimeMillis()-m.starttime)/1000.0));
-			System.out.println("Rate: "+(m.floorscreated/((System.currentTimeMillis()-m.starttime)/1000.0)));
-			System.exit(0);
+		if(key[KeyEvent.VK_S]){
+			m.player.move(0, 2);
+		}
+		if(key[KeyEvent.VK_A]){
+			m.player.move(-2, 0);
+		}
+		if(key[KeyEvent.VK_D]){
+			m.player.move(2, 0);
 		}
 		if(key[KeyEvent.VK_UP]){
+			m.ysc += Tile.size;
+		}
+		if(key[KeyEvent.VK_DOWN]){
+			m.ysc -= Tile.size;
+		}
+		if(key[KeyEvent.VK_LEFT]){
+			m.xsc += Tile.size;
+		}
+		if(key[KeyEvent.VK_RIGHT]){
+			m.xsc -= Tile.size;
+		}
+		if(key[KeyEvent.VK_F1]){
+			double time = ((System.currentTimeMillis()-m.starttime)/1000.0);
+			System.out.println("Floors: "+m.floorscreated+" Time: "+time);
+			double rate = time / ((double)m.floorscreated);
+			System.out.println("Rate: "+rate);
+			System.exit(0);
+		}
+		if(key[KeyEvent.VK_O]){
 			if(m.currentfloor < m.floorscreated-1){
 				m.currentfloor++;
 			}
 		}
-		if(key[KeyEvent.VK_DOWN]){
+		if(key[KeyEvent.VK_L]){
 			if(m.currentfloor > 0){
 				m.currentfloor--;
+			}
+		}
+		if(key[KeyEvent.VK_I]){
+			if(m.zoomlevel+0.05 <= 4){
+				m.zoomlevel += 0.01;
+			}
+		}
+		if(key[KeyEvent.VK_K]){
+			if(m.zoomlevel-0.05 > 0){
+				m.zoomlevel-= 0.01;
 			}
 		}
 	}

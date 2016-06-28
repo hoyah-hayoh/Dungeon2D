@@ -27,11 +27,19 @@ public class Room {
 		this.colour = l.m.randomColor();
 		this.id = id;
 	}
-	public void addTiles(){
+	public void addWalls(){
+		for(int xx = x-Tile.size; xx < x+size_x+Tile.size; xx+=Tile.size){
+			for(int yy = y-Tile.size; yy < y+size_y+Tile.size; yy+=Tile.size){
+				if(xx == x-Tile.size || xx == x+size_x || yy == y-Tile.size || yy == y+size_y){
+					l.newWall(xx, yy, this);
+				}
+			}
+		}
+	}
+	public void addFloor(){
 		for(int xx = x; xx < x+size_x; xx+=Tile.size){
 			for(int yy = y; yy < y+size_y; yy+=Tile.size){
-				Tile t = new Tile(xx, yy, "Floor", this);
-				l.grid.add(t);
+				l.newFloor(xx, yy, this);
 			}
 		}
 	}
