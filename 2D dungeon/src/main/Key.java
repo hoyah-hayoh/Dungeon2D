@@ -50,11 +50,14 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 	}
 
 	public void mousePressed(MouseEvent e) {
-
+		m.player.shoot();
+		
+		
+		m.mousepressed = true;
 	}
 
 	public void mouseReleased(MouseEvent e) {
-
+		m.mousepressed = false;
 	}
 	
 	public void tick(int tickcount){
@@ -97,16 +100,6 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 		if(key[KeyEvent.VK_L]){
 			if(m.currentfloor > 0){
 				m.currentfloor--;
-			}
-		}
-		if(key[KeyEvent.VK_I]){
-			if(m.zoomlevel+0.05 <= 4){
-				m.zoomlevel += 0.01;
-			}
-		}
-		if(key[KeyEvent.VK_K]){
-			if(m.zoomlevel-0.05 > 0){
-				m.zoomlevel-= 0.01;
 			}
 		}
 	}

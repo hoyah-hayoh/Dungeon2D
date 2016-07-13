@@ -6,12 +6,15 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
 import entity.Level;
 import entity.Player;
+import entity.Projectile;
 import entity.Room;
 import entity.Tile;
 
@@ -25,15 +28,18 @@ public class Main {
 	public int mousey;
 	public int xsc = 0;
 	public int ysc = 0;
-	public double zoomlevel = 0.5;
 	int currentfloor = 0;
 	public int floorscreated = 0;
 	long starttime = 0;
+	float fps = 0;
+	float fps_display = 0;
 	Player player;
 	Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+	public boolean mousepressed = false;
+	public ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	
 	public Main() {
-		createMap(1, 6000, 6000, 25, 20, 3);
+		createMap(1, 6000, 6000, 10, 40, 6);
 		
 		f = new JFrame();
 		f.setSize(ss.width, ss.height);
@@ -49,8 +55,10 @@ public class Main {
 		f.addMouseListener(key);
 		f.addMouseWheelListener(key);
 		bs = f.getBufferStrategy();
+
 		new TimeHandler(this, 64).start();
 		new Graphics(this).start();
+		
 		
 		StartGame();
 	}
@@ -78,17 +86,31 @@ public class Main {
 		Level l = getCurrentLevel();
 		if(l.grid != null){
 			for(Tile e : new ArrayList<Tile>(l.grid)){
-				int x = e.x+xsc;
-				int y = e.y+ysc;
-				int size = Tile.size-1;
-				
-				//if(x > 0 && x+size < ss.width && y > 0 && y+size < ss.height){
-					g.setColor(e.getColor());
-					g.fillRect(x, y, size, size);
-					g.setColor(e.getLighting());
-					g.fillRect(x, y, Tile.size-1, Tile.size-1);
-				//}
+				if(e.render){
+					int x = e.x+xsc;
+					int y = e.y+ysc;
+					int size = Tile.size;
+					int radius = 32*Tile.size;
+					
+					if(x > -size && x < ss.width && y > -size && y < ss.height){		
+						float square_dist = (float) (Math.pow((player.x - x), 2) + Math.pow((player.y - y), 2));
+						float A = 0;
+						float R = 0;
+						float G = 0;
+						float B = 0;
+						if(square_dist <= Math.pow(radius, 2)){
+							A = (int)((float)(Math.sqrt(square_dist)/radius));
+						}
+						g.setColor(e.getColor());
+						g.fillRect(x, y, size, size);
+						g.setColor(new Color(A,R,G,B));
+						g.fillRect(x, y, size, size);
+					}			
+				}
 			}
+		}
+		for(Projectile p : projectiles){
+			p.render(g);
 		}
 		player.render(g);
 		g.setColor(Color.RED);
@@ -96,6 +118,7 @@ public class Main {
 		g.drawRect(f.getWidth()-202, 2, 200, 200);
 		g.setColor(Color.GREEN);
 		g.drawString("Floor: "+currentfloor, 50, 80);
+		g.drawString("fps: "+fps_display, 50, 100);
 	}
 	public static Color randomColor() {
 		return new Color((float)randomBiased(0.6), (float)randomBiased(0.6), (float)randomBiased(0.6));
@@ -109,22 +132,12 @@ public class Main {
 		return (int) (Math.floor(((n + m - 1)/m))*m);
 	}
 	public void tick(int tickcount) {	
+		if(tickcount % 10 == 0){
+			fps_display = fps;
+		}
 		key.tick(tickcount);
-		
-		
-		for(Tile t : getCurrentLevel().grid){
-			int xp = t.x;
-			int yp = t.y;
-			int x = player.x;
-			int y = player.y;
-			int radius = 16*Tile.size;
-		    double square_dist = (float) (Math.pow((x - xp),2) + Math.pow((y - yp), 2));
-			if(square_dist <= Math.pow(radius, 2)){
-				float b = 1f - (float) (square_dist/Math.pow(radius, 2));
-				if(t.brightness < b){
-					t.brightness = b;
-				}
-			}
+		for(Projectile p : new ArrayList<Projectile>(projectiles)){
+			p.tick();
 		}
 	}
 	public static void main(String[] args) {

@@ -18,16 +18,16 @@ public class Player {
 		this.m = m;
 		this.x = startx;
 		this.y = starty;
-		m.xsc = -x;
-		m.ysc = -y;
+		m.xsc = -(x-m.f.getWidth()/2);
+		m.ysc = -(y-m.f.getHeight()/2);
 	}
 	public boolean[] move(double xmove, double ymove){
 		xy[0] = false;//wall on the right
 		xy[1] = false;//left
 		xy[2] = false;//bottom
 		xy[3] = false;//top
-		
-/*		if(x+xmove <= 0){
+/*		
+		if(x+xmove <= 0){
 			xy[1] = false;
 		}else if(x+xmove+size >= m.getCurrentLevel().grid_x){
 			xy[0] = false;
@@ -83,7 +83,6 @@ public class Player {
 		g.setColor(Color.YELLOW);
 		g.fillOval(x + m.xsc, y + m.ysc, size, size);
 	}
-	
 	public boolean contains(double xpoint, double ypoint, double xcir, double ycir, double radius) {
 	    double ellw = radius*2;
 	    if (ellw <= 0.0) {
@@ -96,5 +95,13 @@ public class Player {
 	    }
 	    double normy = (ypoint - ycir) / ellh - radius;
 	    return (normx * normx + normy * normy) < radius*radius;
+	}
+	public void shoot() {
+		double targetx = (x)+m.mousex-(m.f.getWidth()/2);
+		double targety = (y)+m.mousey-(m.f.getHeight()/2);
+		double deltaX = targetx - this.x;
+		double deltaY = targety - this.y;	
+		double dir = Math.atan2(deltaY, deltaX);
+		m.projectiles.add(new Projectile(dir, x, y, m));
 	}
 }

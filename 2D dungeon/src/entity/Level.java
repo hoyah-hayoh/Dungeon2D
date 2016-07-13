@@ -73,9 +73,6 @@ public class Level {
 		//LinkFloors();
 		//SetMinimap();
 	}
-	public void addWall(int xx, int yy, Room r){
-		
-	}
 	public ArrayList<Tile> getTilesAtPoint(int x, int y) {
 		ArrayList<Tile> tiles = new ArrayList<Tile>();
 	    for (Tile o : grid) {
@@ -101,6 +98,7 @@ public class Level {
 				}
 			}
 		}
+		System.out.println("Done linkx");
 		for(Room r : new ArrayList<Room>(rooms)){
 			if(r != null){
 				Room r2 = getNearestNeighbour(r);
@@ -109,6 +107,7 @@ public class Level {
 				}
 			}
 		}
+		System.out.println("Done linky");
 		m.floorscreated++;
 	}
 	private Room getNearestNeighbour(Room r) {
@@ -169,11 +168,13 @@ public class Level {
 		for(Room r : new ArrayList<Room>(rooms)){
 			r.addWalls();
 		}
+		System.out.println("Done walls");
 	}
 	private void addFloor() {
 		for(Room r : new ArrayList<Room>(rooms)){
 			r.addFloor();
 		}
+		System.out.println("Done floor");
 	}
 	private void shufflerooms(){
 		boolean intersection = false;
@@ -221,6 +222,7 @@ public class Level {
 				break;
 			}
 		}while(intersection);
+		System.out.println("Done shuffle");
 	}
 	private void createRooms(int i) {
 		int radius;
