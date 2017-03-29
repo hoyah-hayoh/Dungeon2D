@@ -14,6 +14,8 @@ public class Player {
 	public int x = 0;
 	public int y = 0;
 	int size = Tile.size;
+	public boolean shoot = false;
+	
 	public Player(Main m, int startx, int starty){
 		this.m = m;
 		this.x = startx;
@@ -101,7 +103,12 @@ public class Player {
 		double targety = (y)+m.mousey-(m.f.getHeight()/2);
 		double deltaX = targetx - this.x;
 		double deltaY = targety - this.y;	
-		double dir = Math.atan2(deltaY, deltaX);
+		double variation = (Math.random()*10.0)-5.0;
+		double dir = Math.atan2(deltaY, deltaX)+Math.toRadians(variation);
 		m.projectiles.add(new Projectile(dir, x, y, m));
+	}
+	public void teleport(int mousex, int mousey) {
+		x = (mousex+m.xsc);
+		y = (mousey+m.ysc);
 	}
 }

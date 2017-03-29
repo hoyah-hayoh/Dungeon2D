@@ -39,7 +39,7 @@ public class Main {
 	public ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	
 	public Main() {
-		createMap(1, 6000, 6000, 10, 40, 6);
+		createMap(1, 8000, 8000, 20, 40, 5);
 		
 		f = new JFrame();
 		f.setSize(ss.width, ss.height);
@@ -56,7 +56,7 @@ public class Main {
 		f.addMouseWheelListener(key);
 		bs = f.getBufferStrategy();
 
-		new TimeHandler(this, 64).start();
+		new TimeHandler(this, 128).start();
 		new Graphics(this).start();
 		
 		
@@ -83,34 +83,42 @@ public class Main {
 		return l.minimap;
 	}
 	public void render(Graphics2D g) {
+		
 		Level l = getCurrentLevel();
+		float radius = 32*Tile.size;
 		if(l.grid != null){
+			int xscc = xsc;
+			int yscc = ysc;
 			for(Tile e : new ArrayList<Tile>(l.grid)){
 				if(e.render){
-					int x = e.x+xsc;
-					int y = e.y+ysc;
+					int x = e.x;
+					int y = e.y;
 					int size = Tile.size;
-					int radius = 32*Tile.size;
-					
-					if(x > -size && x < ss.width && y > -size && y < ss.height){		
-						float square_dist = (float) (Math.pow((player.x - x), 2) + Math.pow((player.y - y), 2));
-						float A = 0;
-						float R = 0;
-						float G = 0;
-						float B = 0;
-						if(square_dist <= Math.pow(radius, 2)){
-							A = (int)((float)(Math.sqrt(square_dist)/radius));
-						}
+
+					float square_dist = (float) (Math.pow((player.x - x), 2) + Math.pow((player.y - y), 2));
+					float A = 0;
+					float R = 0;
+					float G = 0;
+					float B = 0;
+						
+					if(square_dist <= Math.pow(radius, 2)){
+						A = (float)(Math.sqrt(square_dist)/radius);
+						if(A > 1f) A = 1f;
+						if(A < 0f) A = 0f;
+						
 						g.setColor(e.getColor());
-						g.fillRect(x, y, size, size);
-						g.setColor(new Color(A,R,G,B));
-						g.fillRect(x, y, size, size);
-					}			
+						g.fillRect(x+xscc, y+yscc, size, size);
+						g.setColor(new Color(R,G,B,A));
+						g.fillRect(x+xscc, y+yscc, size, size);
+					}		
 				}
 			}
 		}
 		for(Projectile p : projectiles){
-			p.render(g);
+			float square_dist = (float) (Math.pow((player.x - p.x), 2) + Math.pow((player.y - p.y), 2));
+			if(square_dist <= Math.pow(radius, 2)){
+				p.render(g);
+			}
 		}
 		player.render(g);
 		g.setColor(Color.RED);
@@ -118,7 +126,7 @@ public class Main {
 		g.drawRect(f.getWidth()-202, 2, 200, 200);
 		g.setColor(Color.GREEN);
 		g.drawString("Floor: "+currentfloor, 50, 80);
-		g.drawString("fps: "+fps_display, 50, 100);
+		g.drawString("fps: "+(int)fps_display, 50, 100);
 	}
 	public static Color randomColor() {
 		return new Color((float)randomBiased(0.6), (float)randomBiased(0.6), (float)randomBiased(0.6));
@@ -131,8 +139,13 @@ public class Main {
 		int m = Tile.size;
 		return (int) (Math.floor(((n + m - 1)/m))*m);
 	}
-	public void tick(int tickcount) {	
-		if(tickcount % 10 == 0){
+	public void tick(int tickcount) {
+		if(player != null){
+			if(tickcount % 10 == 0 && player.shoot){
+				player.shoot();
+			}
+		}
+		if(tickcount % 5 == 0){
 			fps_display = fps;
 		}
 		key.tick(tickcount);

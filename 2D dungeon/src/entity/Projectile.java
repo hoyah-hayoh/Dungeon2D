@@ -13,8 +13,8 @@ public class Projectile{
 	int size = 5;
 	double speed = 5;
 	double distance = 0;
-	double x = 0;
-	double y = 0;
+	public double x = 0;
+	public double y = 0;
 	boolean xy[] = new boolean[4];
 	private Main m;
 	private double xt = 0;
@@ -32,6 +32,9 @@ public class Projectile{
 		xy[2] = false;//bottom
 		xy[3] = false;//top
 		
+		double xvel = Math.cos(dir);
+		double yvel = Math.sin(dir);
+		
 		for(Tile e : new ArrayList<Tile>(m.getCurrentLevel().grid)){
 			if(e.type == "Wall"){
 				Rectangle object = new Rectangle((int)e.x, (int)e.y, e.size, e.size);
@@ -39,8 +42,14 @@ public class Projectile{
 				if(object.intersects(aftermove)){
 					if(aftermove.x < object.x){
 						xy[0] = true;
+						/*xvel = -xvel;
+						xmove = xvel;
+						dir = Math.atan2(yvel, xvel);*/
 					}else{
 						xy[1] = true;
+						/*xvel = -xvel;
+						xmove = xvel;
+						dir = Math.atan2(yvel, xvel);*/
 					}
 				}
 				Rectangle object2 = new Rectangle((int)e.x, (int)e.y, e.size, e.size);
@@ -48,13 +57,19 @@ public class Projectile{
 				if(object2.intersects(aftermove2)){
 					if(aftermove.y < object.y){
 						xy[2] = true;
+					    /*yvel = -yvel;
+						ymove = yvel;
+						dir = Math.atan2(yvel, xvel);*/
 					}else{
 						xy[3] = true;
+						/*yvel = -yvel;
+						ymove = yvel;
+						dir = Math.atan2(yvel, xvel);*/
 					}
 				}
 			}
 		}
-		if(xy[0] || xy[1] || xy[2] || xy[3]){
+		if(xy[0] || xy[1] || xy[2] || xy[3]){		
 			m.projectiles.remove(this);
 		}
 		if(xmove > 0 && !xy[0]){

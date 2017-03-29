@@ -18,7 +18,7 @@ public class Tile {
 		this.y = y;
 		this.type = type;
 		this.owner = owner;
-		color = Color.RED;
+		color = Color.GRAY;
 	}
 	public Color getColor(){
 		if(type == "Floor"){

@@ -29,7 +29,8 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 
 	}
 	public void mouseDragged(MouseEvent e) {
-
+		m.mousex = e.getX();
+		m.mousey = e.getY();
 	}
 	public void mouseMoved(MouseEvent e) {
 		m.mousex = e.getX();
@@ -50,19 +51,18 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 	}
 
 	public void mousePressed(MouseEvent e) {
-		m.player.shoot();
-		
-		
+		m.player.shoot = true;	
 		m.mousepressed = true;
 	}
 
 	public void mouseReleased(MouseEvent e) {
+		m.player.shoot = false;
 		m.mousepressed = false;
 	}
 	
 	public void tick(int tickcount){
 		if(key[KeyEvent.VK_W]){
-				m.player.move(0, -2);
+			m.player.move(0, -2);
 		}
 		if(key[KeyEvent.VK_S]){
 			m.player.move(0, 2);
@@ -84,6 +84,12 @@ public class Key implements KeyListener, MouseMotionListener, MouseListener, Mou
 		}
 		if(key[KeyEvent.VK_RIGHT]){
 			m.xsc -= Tile.size;
+		}
+		if(key[KeyEvent.VK_ENTER]){
+		    m.player.teleport(m.mousex, m.mousey);
+		}
+		if(key[KeyEvent.VK_DELETE]){
+		    m.projectiles.clear();
 		}
 		if(key[KeyEvent.VK_F1]){
 			double time = ((System.currentTimeMillis()-m.starttime)/1000.0);
